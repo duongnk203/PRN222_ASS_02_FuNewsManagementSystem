@@ -1,0 +1,64 @@
+@page
+@model FUNewsManagementSystem.Pages_Categories.EditModel
+
+@{
+    ViewData["Title"] = "Edit Category";
+    Layout = "~/Pages/Shared/_LayoutStaff.cshtml";
+}
+
+<div class="container mt-4">
+    <h1 class="text-primary">Edit Category</h1>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-6">
+            <form method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                <input type="hidden" asp-for="Category.CategoryId" />
+
+                <!-- Category Name -->
+                <div class="mb-3">
+                    <label asp-for="Category.CategoryName" class="form-label fw-bold"></label>
+                    <input asp-for="Category.CategoryName" class="form-control" />
+                    <span asp-validation-for="Category.CategoryName" class="text-danger"></span>
+                </div>
+
+                <!-- Category Description -->
+                <div class="mb-3">
+                    <label asp-for="Category.CategoryDesciption" class="form-label fw-bold"></label>
+                    <textarea asp-for="Category.CategoryDesciption" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Category.CategoryDesciption" class="text-danger"></span>
+                </div>
+
+                <!-- Parent Category Dropdown -->
+                <div class="mb-3">
+                    <label asp-for="Category.CategoryName" class="form-label fw-bold"></label>
+                    <select asp-for="Category.ParentCategoryId" class="form-select" asp-items="@((SelectList)ViewData["ParentCategoryId"])">
+                        <option value="">-- Select Parent Category --</option>
+                    </select>
+                    <span asp-validation-for="Category.ParentCategoryId" class="text-danger"></span>
+                </div>
+
+                <!-- IsActive Dropdown -->
+                <div class="mb-3">
+                    <label asp-for="Category.IsActive" class="form-label fw-bold"></label>
+                    <select asp-for="Category.IsActive" class="form-select">
+                        <option value="true">Active</option>
+                        <option value="false">Inactive</option>
+                    </select>
+                    <span asp-validation-for="Category.IsActive" class="text-danger"></span>
+                </div>
+
+                <!-- Buttons -->
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-save"></i> Save Changes
+                    </button>
+                    <a asp-page="./Index" class="btn btn-secondary ms-2">
+                        <i class="bi bi-arrow-left"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

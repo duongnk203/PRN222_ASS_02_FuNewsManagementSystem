@@ -1,0 +1,43 @@
+@page
+@model FUNewsManagementSystem.Pages_Tags.EditModel
+
+@{
+    ViewData["Title"] = "Edit Tag";
+    Layout = "~/Pages/Shared/_LayoutStaff.cshtml";
+}
+
+<div class="container mt-4">
+    <h1 class="text-warning">Edit Tag</h1>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-6">
+            <form method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                <input type="hidden" asp-for="Tag.TagId" />
+
+                <div class="mb-3">
+                    <label asp-for="Tag.TagName" class="form-label fw-bold"></label>
+                    <input asp-for="Tag.TagName" class="form-control" placeholder="Enter tag name..." />
+                    <span asp-validation-for="Tag.TagName" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Tag.Note" class="form-label fw-bold"></label>
+                    <textarea asp-for="Tag.Note" class="form-control" rows="3" placeholder="Enter note..."></textarea>
+                    <span asp-validation-for="Tag.Note" class="text-danger"></span>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Save
+                    </button>
+                    <a asp-page="./Index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

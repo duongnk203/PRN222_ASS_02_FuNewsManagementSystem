@@ -1,0 +1,54 @@
+@page
+@model FUNewsManagementSystem.Pages_SystemAccounts.DetailsModel
+@inject FUNewsManagementSystem.Service.RoleService RoleService
+
+@{
+    ViewData["Title"] = "System Account Details";
+    Layout = "~/Pages/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container mt-4">
+    <h1 class="text-primary">System Account Details</h1>
+    <hr />
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h4 class="card-title">Account Information</h4>
+            <dl class="row">
+                <dt class="col-sm-3">Account Name</dt>
+                <dd class="col-sm-9">@Model.SystemAccount.AccountName</dd>
+
+                <dt class="col-sm-3">Email</dt>
+                <dd class="col-sm-9">@Model.SystemAccount.AccountEmail</dd>
+
+                <dt class="col-sm-3">Role</dt>
+                <dd class="col-sm-9">
+                    <span class="badge bg-@(Model.SystemAccount.AccountRole == 3 ? "danger" : Model.SystemAccount.AccountRole == 1 ? "info" : "secondary")">
+                        @RoleService.GetRoleName(Model.SystemAccount.AccountRole)
+                    </span>
+                </dd>
+
+                <dt class="col-sm-3">Password</dt>
+                <dd class="col-sm-9">
+                    <span class="text-muted">********</span> <!-- Ẩn mật khẩu -->
+                </dd>
+
+                <dt class="col-sm-3">Status</dt>
+                <dd class="col-sm-9">
+                    <span class="badge @(Model.SystemAccount.IsActive ? "bg-success" : "bg-danger")">
+                        @(Model.SystemAccount.IsActive ? "Active" : "Inactive")
+                    </span>
+                </dd>
+            </dl>
+
+            <div class="d-flex gap-2">
+                <a asp-page="./Edit" asp-route-id="@Model.SystemAccount.AccountId" class="btn btn-warning">
+                    <i class="bi bi-pencil"></i> Edit
+                </a>
+                <a asp-page="./Index" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,66 @@
+﻿@page
+@model FUNewsManagementSystem.Pages.Reports.ReportsModel
+
+@{
+    ViewData["Title"] = "Reports";
+    Layout = "~/Pages/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">Generate Reports</h2>
+    <form method="post" class="bg-light p-4 rounded shadow-sm">
+        <div class="row g-3 justify-content-center align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">Start Date:</label>
+                <input type="date" asp-for="StartDate" class="form-control" required style="min-width: 180px;" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">End Date:</label>
+                <input type="date" asp-for="EndDate" class="form-control" required style="min-width: 180px;" />
+            </div>
+            <div class="col-md-3 d-flex justify-content-center">
+                <button type="submit" class="btn btn-primary w-100">Filter Data</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@if (Model.ReportData != null && Model.ReportData.Any())
+{
+    <div class="container mt-4">
+        <h3 class="text-center">Report Results</h3>
+        <table class="table table-bordered table-striped table-hover text-center mt-3 shadow-sm">
+            <thead class="table-dark">
+                <tr>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Created Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var article in Model.ReportData)
+                {
+                    <tr>
+                        <td class="text-start">@article.NewsTitle</td>
+                        <td>@article.CreatedBy.AccountName</td>
+                        <td>@(article.CreatedDate.HasValue ? article.CreatedDate.Value.ToString("yyyy-MM-dd") : "N/A")</td>
+                        <td>
+                            <span class="badge @(article.NewsStatus == true ? "bg-success" : "bg-danger")">
+                                @(article.NewsStatus == true ? "Active" : "Inactive")
+                            </span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else if (Model.ReportData != null)
+{
+    <div class="container mt-4">
+        <div class="alert alert-warning text-center" role="alert">
+            No news articles found for the selected date range.
+        </div>
+    </div>
+}

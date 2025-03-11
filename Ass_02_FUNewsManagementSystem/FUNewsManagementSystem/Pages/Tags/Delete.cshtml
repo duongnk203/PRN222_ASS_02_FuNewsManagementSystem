@@ -1,0 +1,46 @@
+@page
+@model FUNewsManagementSystem.Pages_Tags.DeleteModel
+
+@{
+    ViewData["Title"] = "Delete Tag";
+    Layout = "~/Pages/Shared/_LayoutStaff.cshtml";
+}
+
+<div class="container mt-4">
+    <h1 class="text-danger fw-bold">Delete Tag</h1>
+
+    <!-- Cảnh báo người dùng -->
+    <div class="alert alert-warning mt-3">
+        <strong>Are you sure you want to delete this tag?</strong><br>
+        This action cannot be undone.
+    </div>
+
+    <!-- Hiển thị thông tin tag trong thẻ card -->
+    <div class="card shadow-sm mt-3">
+        <div class="card-body">
+            <h5 class="fw-bold text-primary">Tag Information</h5>
+            <hr>
+
+            <!-- Tag Name -->
+            <div class="mb-2">
+                <strong>Tag Name:</strong> <span class="text-primary">@Model.Tag.TagName</span>
+            </div>
+
+            <!-- Note -->
+            <div class="mb-2">
+                <strong>Note:</strong> <span>@Model.Tag.Note</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form xác nhận xóa -->
+    <form method="post" class="mt-4 d-flex">
+        <input type="hidden" asp-for="Tag.TagId" />
+        <button type="submit" class="btn btn-danger me-2">
+            <i class="bi bi-trash"></i> Confirm Delete
+        </button>
+        <a asp-page="./Index" class="btn btn-secondary">
+            <i class="bi bi-x-circle"></i> Cancel
+        </a>
+    </form>
+</div>

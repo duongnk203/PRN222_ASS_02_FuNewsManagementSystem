@@ -1,0 +1,33 @@
+@page
+@model FUNewsManagementSystem.Pages_Tags.DetailsModel
+
+@{
+    ViewData["Title"] = "Tag Details";
+    Layout = "~/Pages/Shared/_LayoutStaff.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0"><i class="bi bi-tags-fill"></i> Tag Details</h4>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-4 text-muted">Tag Name:</dt>
+                <dd class="col-sm-8 fw-semibold">@Model.Tag.TagName</dd>
+
+                <dt class="col-sm-4 text-muted">Note:</dt>
+                <dd class="col-sm-8">@Model.Tag.Note</dd>
+            </dl>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a asp-page="./Edit" asp-route-id="@Model.Tag.TagId" class="btn btn-warning me-2">
+            <i class="bi bi-pencil-square"></i> Edit
+        </a>
+        <a asp-page="./Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to List
+        </a>
+    </div>
+</div>

@@ -1,0 +1,160 @@
+@page
+@using System.Security.Claims
+@model FUNewsManagementSystem.Pages_NewsAriticles.DetailsModel
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+
+@{
+    ViewData["Title"] = "Details";
+    var roleClaim = User.FindFirst(ClaimTypes.Role);
+    int role = (roleClaim == null || string.IsNullOrEmpty(roleClaim.Value)) ? 0 : int.TryParse(roleClaim.Value, out var parsedRole) ? parsedRole : 0;
+    Layout = role switch
+    {
+        1 => "~/Pages/Shared/_LayoutStaff.cshtml",
+        2 => "~/Pages/Shared/_LayoutLecturer.cshtml",
+        _ => "~/Pages/Shared/_LayoutGuest.cshtml"
+    };
+}
+
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/NewsArticles">News</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@Model.NewsArticle.NewsTitle</li>
+        </ol>
+    </nav>
+
+    <h1 class="text-primary fw-bold">@Model.NewsArticle.NewsTitle</h1>
+    <p class="text-muted">@Model.NewsArticle.CreatedDate | By @Model.NewsArticle.CreatedBy?.AccountName</p>
+
+@*     @if (!string.IsNullOrEmpty(Model.NewsArticle.ImageUrl))
+    {
+        <img src="@Model.NewsArticle.ImageUrl" class="img-fluid w-100 rounded" alt="@Model.NewsArticle.NewsTitle">
+    } *@
+
+    <h4 class="mt-3 text-secondary">@Model.NewsArticle.Headline</h4>
+    <div class="mt-3 fs-5" style="line-height: 1.8;">
+        @Html.Raw(Model.NewsArticle.NewsContent)
+    </div>
+
+    <div class="mt-4 text-muted">
+        <small>Source: @Model.NewsArticle.NewsSource | Category: @Model.NewsArticle.Category?.CategoryName</small>
+    </div>
+
+    <div class="mt-4 d-flex gap-2">
+        <a href="https://www.facebook.com/sharer/sharer.php?u=@Url.PageLink()" target="_blank" class="btn btn-primary btn-sm">Share on Facebook</a>
+        <a href="https://twitter.com/intent/tweet?url=@Url.PageLink()&text=@Model.NewsArticle.NewsTitle" target="_blank" class="btn btn-info btn-sm">Share on Twitter</a>
+    </div>
+
+    <div class="mt-4">
+        <a asp-page="./Index" class="btn btn-outline-secondary">Back to News</a>
+    </div>
+</div>
+<input type="hidden" id="newsArticleId" value="@Model.NewsArticleId" />
+
+<h3 class="mt-5 fw-bold">Ý kiến (<span id="commentCount">@Model.Comments.Count</span>)</h3>
+
+<!-- Hộp nhập bình luận -->
+<div class="comment-box p-3 mb-3 shadow-sm border rounded-3">
+    <form method="post" asp-page="/Comments/Create">
+        <input type="hidden" name="NewsArticleId" value="@Model.NewsArticle.NewsArticleId" />
+        <textarea name="content" class="form-control border-0" rows="3" placeholder="Chia sẻ ý kiến của bạn..." required></textarea>
+        <div class="text-danger mt-1 d-none" id="commentError">Bạn chưa nhập nội dung bình luận.</div>
+        <button type="submit" class="btn btn-primary mt-2">Gửi bình luận</button>
+    </form>
+</div>
+
+<!-- Tab Quan tâm nhất / Mới nhất -->
+<ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+        <a class="nav-link active" href="#">Quan tâm nhất</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="#">Mới nhất</a>
+    </li>
+</ul>
+
+<!-- Danh sách bình luận -->
+<div id="commentList">
+    @foreach (var comment in Model.Comments)
+    {
+        <div class="comment-item p-3 border-bottom">
+            <div class="d-flex align-items-center">
+                <!-- Avatar -->
+                <div class="avatar-circle bg-secondary text-white fw-bold me-2">
+                    @(comment.Account.AccountEmail.Substring(0, 1).ToUpper())
+                </div>
+                <div>
+                    <strong class="text-dark">@comment.Account.AccountEmail</strong>
+                    <small class="text-muted d-block">
+                        @(comment.CreatedDate.HasValue ? comment.CreatedDate.Value.ToString("HH:mm dd/MM/yyyy") : "N/A")
+                    </small>
+                </div>
+            </div>
+
+            <!-- Hiển thị nội dung bình luận -->
+            <p class="mt-2 mb-1 text-dark" id="commentContent_@comment.CommentId">@comment.Content</p>
+
+            <!-- Form sửa bình luận (ẩn mặc định) -->
+            <form method="post" asp-page="/Comments/Update" class="edit-comment-form d-none" id="editForm_@comment.CommentId">
+                <input type="hidden" name="NewsArticleId" value="@Model.NewsArticle.NewsArticleId" />
+                <input type="hidden" name="CommentID" value="@comment.CommentId" />
+                <textarea name="UpdatedContent" class="form-control mb-2" rows="2">@comment.Content</textarea>
+                <button type="submit" class="btn btn-success btn-sm">Lưu</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="cancelEdit(@comment.CommentId)">Hủy</button>
+            </form>
+
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-link text-muted p-0"><i class="bi bi-hand-thumbs-up"></i> 57</button>
+                <button class="btn btn-link text-muted p-0">Trả lời</button>
+
+                @if (User.Identity.IsAuthenticated &&
+               (comment.AccountId == int.Parse(User.FindFirst("AccountID")?.Value ?? "0") || User.IsInRole("Admin")))
+                {
+                    <button class="btn btn-link text-primary p-0" onclick="editComment(@comment.CommentId)">Sửa</button>
+                    <form method="post" asp-page="/Comments/Delete" class="d-inline">
+                        <input type="hidden" name="NewsArticleId" value="@Model.NewsArticle.NewsArticleId" />
+                        <input type="hidden" name="CommentID" value="@comment.CommentId" />
+                        <button type="submit" class="btn btn-link text-danger p-0">Xóa</button>
+                    </form>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    /* Avatar tròn */
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    /* Nút thích và trả lời */
+    .btn-link {
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+
+        .btn-link:hover {
+            text-decoration: underline;
+        }
+</style>
+
+<script>
+    function editComment(commentId) {
+        document.getElementById("commentContent_" + commentId).style.display = "none";
+        document.getElementById("editForm_" + commentId).classList.remove("d-none");
+    }
+
+    function cancelEdit(commentId) {
+        document.getElementById("commentContent_" + commentId).style.display = "block";
+        document.getElementById("editForm_" + commentId).classList.add("d-none");
+    }
+</script>

@@ -1,0 +1,130 @@
+@page
+@model FUNewsManagementSystem.Pages_NewsAriticles.CreateModel
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Pages/Shared/_LayoutStaff.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Create News Article</h3>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Message"] != null && !string.IsNullOrEmpty(TempData["Message"].ToString()))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            @TempData["Message"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <form method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <!-- News Title -->
+                        <div class="mb-3">
+                            <label asp-for="NewsArticle.NewsTitle" class="form-label fw-bold">Title</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-type"></i></span>
+                                <input asp-for="NewsArticle.NewsTitle" class="form-control" placeholder="Enter news title" />
+                            </div>
+                            <span asp-validation-for="NewsArticle.NewsTitle" class="text-danger"></span>
+                        </div>
+
+                        <!-- Headline -->
+                        <div class="mb-3">
+                            <label asp-for="NewsArticle.Headline" class="form-label fw-bold">Headline</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-card-heading"></i></span>
+                                <input asp-for="NewsArticle.Headline" class="form-control" placeholder="Enter headline" />
+                            </div>
+                            <span asp-validation-for="NewsArticle.Headline" class="text-danger"></span>
+                        </div>
+
+                        <!-- News Content -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Content</label>
+                            <div id="editor-container" style="height: 200px;"></div>
+                            <input type="hidden" asp-for="NewsArticle.NewsContent" id="hiddenContent" />
+                            <span asp-validation-for="NewsArticle.NewsContent" class="text-danger"></span>
+                        </div>
+
+                        <!-- News Source -->
+                        <div class="mb-3">
+                            <label asp-for="NewsArticle.NewsSource" class="form-label fw-bold">Source</label>
+                            <input asp-for="NewsArticle.NewsSource" class="form-control" placeholder="Enter news source" />
+                            <span asp-validation-for="NewsArticle.NewsSource" class="text-danger"></span>
+                        </div>
+
+                        <!-- Category -->
+                        <div class="mb-3">
+                            <label asp-for="NewsArticle.CategoryId" class="form-label fw-bold">Category</label>
+                            <select asp-for="NewsArticle.CategoryId" class="form-select" asp-items="@((SelectList)ViewData["CategoryId"])">
+                                <option value="">-- Select Category --</option>
+                            </select>
+                            <span asp-validation-for="NewsArticle.CategoryId" class="text-danger"></span>
+                        </div>
+
+                        <!-- Created By (Ẩn nếu không cần chọn thủ công) -->
+                        <input type="hidden" asp-for="NewsArticle.CreatedById" value="@User.FindFirst("AccountID")?.Value" />
+
+                        <!-- News Status -->
+                        <div class="mb-3">
+                            <label asp-for="NewsArticle.NewsStatus" class="form-label fw-bold">Status</label>
+                            <select asp-for="NewsArticle.NewsStatus" class="form-select">
+                                <option value="True">Active</option>
+                                <option value="False">Inactive</option>
+                            </select>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-flex justify-content-between">
+                            <a asp-page="Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Back to List
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Create
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var quill = new Quill("#editor-container", {
+                theme: "snow",
+                placeholder: "Write news content...",
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, false] }],
+                        ['bold', 'italic', 'underline'],
+                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                        ['link', 'blockquote', 'code-block'],
+                        [{ 'align': [] }],
+                        ['clean'] // Xóa định dạng
+                    ]
+                }
+            });
+
+            // Khi submit form, lưu nội dung Quill vào input hidden
+            document.querySelector("form").onsubmit = function () {
+                document.querySelector("#hiddenContent").value = quill.root.innerHTML;
+            };
+        });
+    </script>
+}
+<!-- Quill.js CSS -->
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+
+<!-- Quill.js Script -->
+<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>

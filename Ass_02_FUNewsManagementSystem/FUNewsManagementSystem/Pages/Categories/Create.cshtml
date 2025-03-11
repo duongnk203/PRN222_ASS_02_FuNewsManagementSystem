@@ -1,0 +1,55 @@
+@page
+@model FUNewsManagementSystem.Pages_Categories.CreateModel
+
+@{
+    ViewData["Title"] = "Create Category";
+    Layout = "~/Pages/Shared/_LayoutStaff.cshtml";
+}
+
+<div class="container mt-4">
+    <h1 class="text-primary">Create Category</h1>
+    <hr />
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Category.CategoryName" class="form-label fw-bold"></label>
+                    <input asp-for="Category.CategoryName" class="form-control" />
+                    <span asp-validation-for="Category.CategoryName" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Category.CategoryDesciption" class="form-label fw-bold"></label>
+                    <input asp-for="Category.CategoryDesciption" class="form-control" />
+                    <span asp-validation-for="Category.CategoryDesciption" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Category.CategoryName" class="form-label fw-bold"></label>
+                    <select asp-for="Category.ParentCategoryId" class="form-select" asp-items="@((SelectList)ViewData["ParentCategoryId"])">
+                        <option value="">-- Select Parent Category --</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Category.IsActive" class="form-label fw-bold"></label>
+                    <select asp-for="Category.IsActive" class="form-select">
+                        <option value="true">Active</option>
+                        <option value="false">Inactive</option>
+                    </select>
+                    <span asp-validation-for="Category.IsActive" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Create
+                </button>
+                <a asp-page="Index" class="btn btn-secondary ms-2">
+                    <i class="bi bi-arrow-left"></i> Back to List
+                </a>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,79 @@
+﻿@page
+@model FUNewsManagementSystem.Pages.Profile.EditModel;
+
+@{
+    ViewData["Title"] = "Edit Account";
+    Layout = "~/Pages/Shared/_LayoutStaff.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Edit Account</h3>
+                </div>
+                <div class="card-body">
+                    @if (TempData["Message"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            @TempData["Message"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <form method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                        <input type="hidden" asp-for="Account.AccountId" />
+
+                        <!-- Account Name -->
+                        <div class="mb-3">
+                            <label asp-for="Account.AccountName" class="form-label fw-bold">
+                                <i class="bi bi-person-circle"></i> Account Name
+                            </label>
+                            <input asp-for="Account.AccountName" class="form-control" placeholder="Enter account name" />
+                            <span asp-validation-for="Account.AccountName" class="text-danger"></span>
+                        </div>
+
+                        <!-- Account Email -->
+                        <div class="mb-3">
+                            <label asp-for="Account.AccountEmail" class="form-label fw-bold">
+                                <i class="bi bi-envelope"></i> Email
+                            </label>
+                            <input asp-for="Account.AccountEmail" class="form-control" placeholder="Enter email" />
+                            <span asp-validation-for="Account.AccountEmail" class="text-danger"></span>
+                        </div>
+
+                        <!-- Account Role -->
+                        <div class="mb-3">
+                            <label asp-for="Account.AccountRole" class="form-label fw-bold">
+                                <i class="bi bi-person-badge"></i> Role
+                            </label>
+                            <select disabled asp-for="Account.AccountRole" class="form-control" asp-items="Model.RoleList">
+                                <option value="">-- Select Role --</option>
+                            </select>
+                            <input type="hidden" asp-for="Account.AccountRole" />
+                            <span asp-validation-for="Account.AccountRole" class="text-danger"></span>
+                        </div>
+
+                        <input type="hidden" asp-for="Account.AccountPassword" class="form-control" />
+
+                        <!-- Buttons -->
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-save"></i> Save
+                            </button>
+                            <a asp-page="Details" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Back to profile
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

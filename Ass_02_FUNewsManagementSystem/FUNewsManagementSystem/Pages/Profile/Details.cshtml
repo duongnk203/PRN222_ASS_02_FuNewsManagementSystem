@@ -1,0 +1,41 @@
+﻿@page
+@model FUNewsManagementSystem.Pages.Profile.DetailsModel;
+@inject FUNewsManagementSystem.Service.RoleService roleService
+
+@{
+    ViewData["Title"] = "Account Details";
+    Layout = "~/Pages/Shared/_LayoutStaff.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">Account Details</h3>
+        </div>
+        <div class="card-body">
+            @if (!string.IsNullOrEmpty(TempData["Message"] as string))
+            {
+                <div class="alert alert-danger">
+                    @TempData["Message"]
+                </div>
+            }
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                    <strong>Account Name:</strong> @Model.Account.AccountName
+                </li>
+                <li class="list-group-item">
+                    <strong>Email:</strong> @Model.Account.AccountEmail
+                </li>
+                <li class="list-group-item">
+                    <strong>Role:</strong> @roleService.GetRoleName(Model.Account.AccountRole)
+                </li>
+            </ul>
+        </div>
+        <div class="card-footer text-end">
+            <a asp-page="Edit" asp-route-id="@Model?.Account.AccountId" class="btn btn-primary">
+                <i class="bi bi-pencil"></i> Edit
+            </a>
+
+        </div>
+    </div>
+</div>
