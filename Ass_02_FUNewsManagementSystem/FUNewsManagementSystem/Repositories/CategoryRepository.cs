@@ -56,7 +56,8 @@ namespace FUNewsManagementSystem.Repositories
             }
             if (category != null)
             {
-                _context.Categories.Remove(category);
+                category.IsActive = false;
+                _context.Categories.Update(category);
                 _context.SaveChanges();
             }
         }

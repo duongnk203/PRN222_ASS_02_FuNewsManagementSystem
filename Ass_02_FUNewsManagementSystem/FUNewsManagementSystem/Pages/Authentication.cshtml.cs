@@ -21,7 +21,7 @@ namespace FUNewsManagementSystem.Pages
         [BindProperty]
         public AccountLogin AccountLogin { get; set; } = new();
 
-        public async Task<IActionResult> OnPostAsync()
+        public async Task<IActionResult> OnPostLoginAsync()
         {
             var (role, message) = await _systemAccountRepository.Login(AccountLogin, HttpContext);
 
@@ -40,14 +40,14 @@ namespace FUNewsManagementSystem.Pages
             };
         }
 
-        public async Task<IActionResult> OnPostLogout()
+        public async Task<IActionResult> OnPostLogoutAsync()
         {
             var message = await _systemAccountRepository.Logout(HttpContext);
-            if (!string.IsNullOrEmpty(message))
-            {
-                TempData["Message"] = message;
-                return Page();
-            }
+            //if (!string.IsNullOrEmpty(message))
+            //{
+            //    TempData["Message"] = message;
+            //    return Page();
+            //}
             return RedirectToPage("Index", "NewsArticles");
         }
 

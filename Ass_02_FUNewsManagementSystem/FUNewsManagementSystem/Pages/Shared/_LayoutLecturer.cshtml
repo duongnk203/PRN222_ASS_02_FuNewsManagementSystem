@@ -28,7 +28,7 @@
                     </ul>
                     <ul class="navbar-nav">
                         <li class="nav-item">
-                            <form asp-page="Authentication" asp-page-handler="Logout" method="post">
+                            <form asp-page="/Authentication" asp-page-handler="Logout">
                                 @Html.AntiForgeryToken()
                                 <button type="submit" class="btn btn-danger">Logout</button>
                             </form>
@@ -52,8 +52,6 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/microsoft/signalr/dist/browser/signalr.js"></script>
-    <script src="~/js/site.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

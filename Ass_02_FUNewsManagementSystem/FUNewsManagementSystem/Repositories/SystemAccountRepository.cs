@@ -223,12 +223,17 @@ namespace FUNewsManagementSystem.Repositories
             string message = "";
             try
             {
+                // Đăng xuất người dùng
                 await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+                // Xóa toàn bộ claims trong HttpContext
+                httpContext.User = new ClaimsPrincipal(new ClaimsIdentity());
+
+                message = "Đăng xuất thành công!";
             }
             catch (Exception ex)
             {
-                // Ghi log nếu cần
-                message = $"Logout is invalid: {ex.Message}";
+                message = $"Lỗi khi đăng xuất: {ex.Message}";
             }
             return message;
         }

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using Microsoft.Identity.Client;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace FUNewsManagementSystem.ViewModel
@@ -29,5 +30,11 @@ namespace FUNewsManagementSystem.ViewModel
         public string AccountEmail { get; set; }
         [Required]
         public int AccountRole { get; set; }
+    }
+
+    public class AccountComment
+    {
+        public int AccountId { get; set; }
+        public int Role { get; set; }
     }
 }

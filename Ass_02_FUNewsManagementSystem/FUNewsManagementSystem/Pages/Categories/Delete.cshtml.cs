@@ -17,41 +17,51 @@ namespace FUNewsManagementSystem.Pages_Categories
         [BindProperty]
         public Category Category { get; set; } = default!;
 
+        [TempData] // Lưu trữ thông báo lỗi cho postback
+        public string? ErrorMessage { get; set; }
+
         public IActionResult OnGet(short? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
-            var message = "";
 
-            var category = _categoryRepository.GetCategory((int)id, out message); 
+            var message = "";
+            var category = _categoryRepository.GetCategory((int)id, out message);
 
             if (category is not null)
             {
                 Category = category;
-
                 return Page();
             }
 
-            return NotFound();
+            ErrorMessage = "Category not found!";
+            return RedirectToPage("./Index");
         }
 
         public IActionResult OnPost(short? id)
         {
             if (id == null)
             {
-                return NotFound();
+                ErrorMessage = "Invalid category ID!";
+                return RedirectToPage("./Index");
             }
+
             var message = "";
-            var category = _categoryRepository.GetCategory((int)id,out message);
+            var category = _categoryRepository.GetCategory((int)id, out message);
             Category = category;
+            if (category == null)
+            {
+                ErrorMessage = "Category not found!";
+                return RedirectToPage("./Index");
+            }
 
             _categoryRepository.Delete((int)id, out message);
-            if(!string.IsNullOrEmpty(message))
+
+            if (!string.IsNullOrEmpty(message))
             {
-                ModelState.Clear();
-                ModelState.AddModelError(string.Empty, message);
+                ErrorMessage = message;
                 return Page();
             }
 

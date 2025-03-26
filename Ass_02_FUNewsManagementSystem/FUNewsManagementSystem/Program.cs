@@ -6,11 +6,19 @@ using FUNewsManagementSystem.ViewModel;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+
+//Add controller
+builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+});
 
 var connectionStrings = builder.Configuration.GetConnectionString("FuNewsSystemDB");
 builder.Services.AddDbContext<FunewsManagementContext>(options => options.UseSqlServer(connectionStrings));
@@ -25,10 +33,11 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 //Cau hinh signalr
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<SignalRServer>();
-builder.Services.AddRazorPages().AddJsonOptions(options =>
+builder.Services.AddControllers().AddJsonOptions(options =>
 {
-    options.JsonSerializerOptions.PropertyNamingPolicy = null;
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 });
+
 
 builder.Services.AddSession(options =>
 {
@@ -70,6 +79,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.MapControllers();
 
 app.UseAuthorization();
 

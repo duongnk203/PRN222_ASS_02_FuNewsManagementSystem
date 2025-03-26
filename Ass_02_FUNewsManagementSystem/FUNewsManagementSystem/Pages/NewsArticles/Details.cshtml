@@ -5,13 +5,14 @@
 
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "News Article Management";
     var roleClaim = User.FindFirst(ClaimTypes.Role);
     int role = (roleClaim == null || string.IsNullOrEmpty(roleClaim.Value)) ? 0 : int.TryParse(roleClaim.Value, out var parsedRole) ? parsedRole : 0;
     Layout = role switch
     {
         1 => "~/Pages/Shared/_LayoutStaff.cshtml",
         2 => "~/Pages/Shared/_LayoutLecturer.cshtml",
+        3 => "~/Pages/Shared/_LayoutAdmin.cshtml",
         _ => "~/Pages/Shared/_LayoutGuest.cshtml"
     };
 }
@@ -28,7 +29,7 @@
     <h1 class="text-primary fw-bold">@Model.NewsArticle.NewsTitle</h1>
     <p class="text-muted">@Model.NewsArticle.CreatedDate | By @Model.NewsArticle.CreatedBy?.AccountName</p>
 
-@*     @if (!string.IsNullOrEmpty(Model.NewsArticle.ImageUrl))
+    @*     @if (!string.IsNullOrEmpty(Model.NewsArticle.ImageUrl))
     {
         <img src="@Model.NewsArticle.ImageUrl" class="img-fluid w-100 rounded" alt="@Model.NewsArticle.NewsTitle">
     } *@
@@ -57,74 +58,44 @@
 
 <!-- Hộp nhập bình luận -->
 <div class="comment-box p-3 mb-3 shadow-sm border rounded-3">
-    <form method="post" asp-page="/Comments/Create">
-        <input type="hidden" name="NewsArticleId" value="@Model.NewsArticle.NewsArticleId" />
-        <textarea name="content" class="form-control border-0" rows="3" placeholder="Chia sẻ ý kiến của bạn..." required></textarea>
+    <form id="commentForm">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="NewsArticleId" id="NewsArticleId" value="@Model.NewsArticle.NewsArticleId" />
+        <textarea name="content" id="commentContent" class="form-control border-0" rows="3" placeholder="Chia sẻ ý kiến của bạn..." required></textarea>
         <div class="text-danger mt-1 d-none" id="commentError">Bạn chưa nhập nội dung bình luận.</div>
         <button type="submit" class="btn btn-primary mt-2">Gửi bình luận</button>
     </form>
 </div>
 
-<!-- Tab Quan tâm nhất / Mới nhất -->
+@* <!-- Tab Quan tâm nhất / Mới nhất -->
 <ul class="nav nav-tabs mb-3">
     <li class="nav-item">
         <a class="nav-link active" href="#">Quan tâm nhất</a>
     </li>
-    <li class="nav-item">
-        <a class="nav-link" href="#">Mới nhất</a>
-    </li>
-</ul>
+</ul> *@
 
 <!-- Danh sách bình luận -->
-<div id="commentList">
-    @foreach (var comment in Model.Comments)
-    {
-        <div class="comment-item p-3 border-bottom">
-            <div class="d-flex align-items-center">
-                <!-- Avatar -->
-                <div class="avatar-circle bg-secondary text-white fw-bold me-2">
-                    @(comment.Account.AccountEmail.Substring(0, 1).ToUpper())
-                </div>
-                <div>
-                    <strong class="text-dark">@comment.Account.AccountEmail</strong>
-                    <small class="text-muted d-block">
-                        @(comment.CreatedDate.HasValue ? comment.CreatedDate.Value.ToString("HH:mm dd/MM/yyyy") : "N/A")
-                    </small>
-                </div>
-            </div>
+<div id="commentList" class="comment-list-container"></div>
 
-            <!-- Hiển thị nội dung bình luận -->
-            <p class="mt-2 mb-1 text-dark" id="commentContent_@comment.CommentId">@comment.Content</p>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/microsoft/signalr/dist/browser/signalr.js"></script>
+<script src="~/js/site.js"></script>
 
-            <!-- Form sửa bình luận (ẩn mặc định) -->
-            <form method="post" asp-page="/Comments/Update" class="edit-comment-form d-none" id="editForm_@comment.CommentId">
-                <input type="hidden" name="NewsArticleId" value="@Model.NewsArticle.NewsArticleId" />
-                <input type="hidden" name="CommentID" value="@comment.CommentId" />
-                <textarea name="UpdatedContent" class="form-control mb-2" rows="2">@comment.Content</textarea>
-                <button type="submit" class="btn btn-success btn-sm">Lưu</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="cancelEdit(@comment.CommentId)">Hủy</button>
-            </form>
-
-            <div class="d-flex align-items-center gap-3">
-                <button class="btn btn-link text-muted p-0"><i class="bi bi-hand-thumbs-up"></i> 57</button>
-                <button class="btn btn-link text-muted p-0">Trả lời</button>
-
-                @if (User.Identity.IsAuthenticated &&
-               (comment.AccountId == int.Parse(User.FindFirst("AccountID")?.Value ?? "0") || User.IsInRole("Admin")))
-                {
-                    <button class="btn btn-link text-primary p-0" onclick="editComment(@comment.CommentId)">Sửa</button>
-                    <form method="post" asp-page="/Comments/Delete" class="d-inline">
-                        <input type="hidden" name="NewsArticleId" value="@Model.NewsArticle.NewsArticleId" />
-                        <input type="hidden" name="CommentID" value="@comment.CommentId" />
-                        <button type="submit" class="btn btn-link text-danger p-0">Xóa</button>
-                    </form>
-                }
-            </div>
-        </div>
-    }
-</div>
 
 <style>
+    .comment-list-container {
+        max-height: 400px; /* Giới hạn chiều cao, có thể điều chỉnh */
+        overflow-y: auto; /* Tạo thanh cuộn dọc khi nội dung vượt quá chiều cao */
+        border: 1px solid #ddd;
+        padding: 10px;
+        background-color: #f9f9f9;
+        border-radius: 5px;
+    }
+
+    .comment-list-container {
+        max-height: 50vh;
+        overflow-y: auto;
+    }
     /* Avatar tròn */
     .avatar-circle {
         width: 40px;
@@ -148,13 +119,101 @@
 </style>
 
 <script>
+    var newsArticleId = "@Model.NewsArticle.NewsArticleId";
+
+    // Xử lý sự kiện gửi bình luận
+    $("#commentForm").submit(function (event) {
+        event.preventDefault(); // Ngăn chặn hành động mặc định của form
+
+        let content = $("#commentContent").val().trim();
+        if (!content) {
+            $("#commentError").removeClass("d-none");
+            return;
+        } else {
+            $("#commentError").addClass("d-none");
+        }
+
+        let isAuthenticated = "@User.Identity.IsAuthenticated".toLowerCase() === "true"; // Kiểm tra trạng thái đăng nhập
+
+        if (!isAuthenticated) {
+            if (confirm("Bạn cần đăng nhập để bình luận. Bạn có muốn đăng nhập ngay không?")) {
+                window.location.href = "/Authentication"; // Chuyển hướng đến trang đăng nhập
+            }
+            return; // Dừng xử lý gửi bình luận nếu chưa đăng nhập
+        }
+
+        $.ajax({
+            url: "/api/Comments/Create",
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({
+                newsArticleId: newsArticleId,
+                content: content
+            }),
+            success: function () {
+                $("#commentContent").val(""); // Xóa nội dung ô nhập
+                console.log("✅ Bình luận đã được gửi!");
+            },
+            error: function (xhr) {
+                console.error("❌ Lỗi khi gửi bình luận:", xhr.status, xhr.statusText, xhr.responseText);
+                alert("Lỗi: " + xhr.responseText);
+            }
+        });
+    });
+
+
+    // Xử lý khi nhấn nút "Sửa"
     function editComment(commentId) {
-        document.getElementById("commentContent_" + commentId).style.display = "none";
-        document.getElementById("editForm_" + commentId).classList.remove("d-none");
+        let contentElement = $(`#commentContent_${commentId}`);
+        let currentContent = contentElement.text().trim();
+
+        // Hiển thị ô nhập để chỉnh sửa
+        let inputField = `<input type="text" class="form-control" id="editInput_${commentId}" value="${currentContent}">`;
+        let saveButton = `<button class="btn btn-sm btn-success mt-1" onclick="saveComment(${commentId})">💾 Lưu</button>`;
+
+        contentElement.html(inputField + saveButton);
     }
 
-    function cancelEdit(commentId) {
-        document.getElementById("commentContent_" + commentId).style.display = "block";
-        document.getElementById("editForm_" + commentId).classList.add("d-none");
+    // Xử lý khi nhấn "Lưu" sau khi sửa
+    function saveComment(commentId) {
+        let newContent = $(`#editInput_${commentId}`).val().trim();
+
+        if (newContent === "") {
+            alert("Nội dung không được để trống!");
+            return;
+        }
+
+        $.ajax({
+            url: `/api/Comments/UpdateComment`,
+            method: "Post",
+            contentType: "application/json",
+            data: JSON.stringify({ commentId : commentId, content: newContent }),
+            success: () => {
+                console.log("✅ Bình luận đã được cập nhật!");
+                $(`#commentContent_${commentId}`).html(newContent);
+            },
+            error: (xhr) => {
+                console.error("❌ Lỗi khi cập nhật bình luận:", xhr.responseText);
+                alert("Lỗi khi cập nhật bình luận!");
+            }
+        });
+    }
+
+    // Xử lý khi nhấn "Xóa"
+    function deleteComment(commentId) {
+        if (!confirm("Bạn có chắc muốn xóa bình luận này?")) return;
+
+        $.ajax({
+            url: `/api/Comments/Delete/${commentId}`,
+            method: "DELETE",
+
+            success: () => {
+                console.log("✅ Bình luận đã bị xóa!");
+            },
+            error: (xhr) => {
+                console.error("❌ Lỗi khi xóa bình luận:", xhr.responseText);
+                alert("Lỗi khi xóa bình luận!");
+            }
+        });
     }
 </script>

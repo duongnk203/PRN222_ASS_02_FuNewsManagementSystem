@@ -1,4 +1,5 @@
 ﻿using FUNewsManagementSystem.Models;
+using FUNewsManagementSystem.ViewModel;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.Design;
 
@@ -6,7 +7,7 @@ namespace FUNewsManagementSystem.Repositories
 {
     public interface ICommentRepository
     {
-        List<Comment> GetComments(int newsArticleID, out string message);
+        List<CommentDisplay> GetComments(int newsArticleID, int role, int accountId, out string message);
         void CreateComment(Comment comment, out string message);
         void DeleteComment(int commentID, out string message);
         Comment GetComment(int commentId, out string message);
@@ -58,29 +59,43 @@ namespace FUNewsManagementSystem.Repositories
             throw new NotImplementedException();
         }
 
-        public List<Comment> GetComments(int newsArticleID, out string message)
+        public List<CommentDisplay> GetComments(int newsArticleID, int role, int accountId, out string message)
         {
             message = "";
-            List<Comment> comments = new List<Comment>();
+            List<CommentDisplay> commentsDisplay = new List<CommentDisplay>();
 
             if (newsArticleID <= 0)
             {
-                message = "News article is not exist for user comment!";
-                return comments;
+                message = "News article does not exist for user comments!";
+                return commentsDisplay;
             }
 
-            comments = _context.Comments
+            var comments = _context.Comments
                 .Where(c => c.NewsArticleId == newsArticleID && c.IsActive == true)
-                .Include(c => c.Account) // Include thông tin Account
+                .Include(c => c.Account)
                 .ToList();
 
-            if (comments.Count <= 0)
+            if (comments.Count == 0)
             {
                 message = "News article does not have comments";
             }
 
-            return comments;
+            // Nếu accountId == -1 hoặc không khớp với c.AccountId, thì không thể sửa hoặc xóa (trừ Admin)
+            bool isValidUser = accountId > 0;
+            bool isAdmin = role == 3;
+
+            // Duyệt qua danh sách comment và gán quyền
+            commentsDisplay = comments.Select(c => new CommentDisplay
+            {
+                Comment = c,
+                canDelete = isAdmin || (isValidUser && (role == 1 || role == 2) && c.AccountId == accountId),
+                canUpdate = isValidUser && (role == 1 || role == 2) && c.AccountId == accountId
+            }).ToList();
+
+            return commentsDisplay;
         }
+
+
 
         public void Update(int commentId, string content, out string message)
         {

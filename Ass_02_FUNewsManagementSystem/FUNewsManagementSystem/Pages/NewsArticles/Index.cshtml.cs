@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using FUNewsManagementSystem.Repositories;
 using FUNewsManagementSystem.ViewModel;
-using FUNewsManagementSystem.Models;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 
@@ -56,6 +55,12 @@ namespace FUNewsManagementSystem.Pages_NewsAriticles
                     }
                 }
 
+                // Kiểm tra nếu không có bài báo nào được tìm thấy
+                if (!newsArticles.Any())
+                {
+                    TempData["Message"] = "No articles found.";
+                }
+
                 // Cập nhật danh sách hiển thị
                 NewsArticle = newsArticles;
             }
@@ -65,6 +70,5 @@ namespace FUNewsManagementSystem.Pages_NewsAriticles
                 NewsArticle = new List<NewsArticleViewModel>();
             }
         }
-
     }
 }
